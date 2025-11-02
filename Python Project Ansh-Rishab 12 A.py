@@ -10,7 +10,7 @@ def connect():
 def setup():
     try:
         c = sql.connect(host="localhost", user="root", passwd="ansh", auth_plugin='mysql_native_password')
-        cur = c.cursor()
+        cur = c.cursor(buffered=True)
         
         # Create database if not exists
         cur.execute("CREATE DATABASE IF NOT EXISTS auto_db")
@@ -42,7 +42,7 @@ def add():
     print("="*60)
     
     c = connect()
-    cur = c.cursor()
+    cur = c.cursor(buffered=True)
     
     r = input("\nEnter Registration No: ")
     m = input("Enter Model: ")
@@ -76,7 +76,7 @@ def display():
     print("="*60)
     
     c = connect()
-    cur = c.cursor()
+    cur = c.cursor(buffered=True)
     
     q = "SELECT * FROM vehicles"
     cur.execute(q)
@@ -86,11 +86,11 @@ def display():
     if len(data) == 0:
         print("\n⚠ No records found in database!")
     else:
-        print("\n{:<5} {:<15} {:<15} {:<12} {:<6} {:<10}".format("ID", "REG NO", "MODEL", "BRAND", "YEAR", "PRICE"))
-        print("-"*60)
+        print("\nID    REG NO          MODEL           BRAND        YEAR   PRICE")
+        print("------------------------------------------------------------")
         for i in data:
-            print("{:<5} {:<15} {:<15} {:<12} {:<6} {:<10}".format(i[0], i[1], i[2], i[3], i[4], i[5]))
-        print("-"*60)
+            print(str(i[0]) + "     " + str(i[1]) + "                " + str(i[2]) + "             " + str(i[3]) + "            " + str(i[4]) + "         " + str(i[5]))
+        print("------------------------------------------------------------")
         print("Total Records: " + str(len(data)))
     
     cur.close()
@@ -102,42 +102,41 @@ def display():
 
 
 
-
 # Search vehicle
 def search():
-    print("\n" + "="*60)
-    print(" "*20 + "SEARCH VEHICLE")
-    print("="*60)
+    print("\n" + "╔" + "═"*58 + "╗")
+    print("║" + " "*20 + "SEARCH VEHICLE" + " "*24 + "║")
+    print("╚" + "═"*58 + "╝")
     
     c = connect()
-    cur = c.cursor()
+    cur = c.cursor(buffered=True)  
     
-    r = input("\nEnter Registration No to search: ")
+    r = input("\n➜ Enter Registration No to search: ")
     
-    q = "SELECT * FROM vehicles WHERE reg_no = '" + r + "'"
-    cur.execute(q)
+    q = "SELECT * FROM vehicles WHERE reg_no = %s"
+    cur.execute(q, (r,))
     
     data = cur.fetchone()
     
     if data == None:
-        print("\n⚠ Vehicle not found!")
+        print("\n┌" + "─"*58 + "┐")
+        print("│  ⚠  Vehicle not found!" + " "*33 + "│")
+        print("└" + "─"*58 + "┘")
     else:
-        print("\n" + "-"*60)
-        print(" "*20 + "VEHICLE DETAILS")
-        print("-"*60)
-        print("ID              : " + str(data[0]))
-        print("Registration No : " + str(data[1]))
-        print("Model           : " + str(data[2]))
-        print("Brand           : " + str(data[3]))
-        print("Year            : " + str(data[4]))
-        print("Price           : Rs." + str(data[5]))
-        print("-"*60)
+        print("\n╔" + "═"*58 + "╗")
+        print("║" + " "*20 + "VEHICLE DETAILS" + " "*23 + "║")
+        print("╚" + "═"*58 + "╝")
+        print("\n┌" + "─"*57 + "┐")
+        print("│  ID              : " + str(data[0]) + " "*(37-len(str(data[0]))) + "│")
+        print("│  Registration No : " + str(data[1]) + " "*(37-len(str(data[1]))) + "│")
+        print("│  Model           : " + str(data[2]) + " "*(37-len(str(data[2]))) + "│")
+        print("│  Brand           : " + str(data[3]) + " "*(37-len(str(data[3]))) + "│")
+        print("│  Year            : " + str(data[4]) + " "*(37-len(str(data[4]))) + "│")
+        print("│  Price           : Rs." + str(data[5]) + " "*(34-len(str(data[5]))) + "│")
+        print("└" + "─"*57 + "┘")
     
     cur.close()
     c.close()
-
-
-
 
 
 
@@ -152,7 +151,7 @@ def update():
     print("="*60)
     
     c = connect()
-    cur = c.cursor()
+    cur = c.cursor(buffered=True)
     
     r = input("\nEnter Registration No to update: ")
     
@@ -205,7 +204,7 @@ def delete():
     print("="*60)
     
     c = connect()
-    cur = c.cursor()
+    cur = c.cursor(buffered=True)
     
     r = input("\nEnter Registration No to delete: ")
     
@@ -239,7 +238,7 @@ def backup():
     print("="*60)
     
     c = connect()
-    cur = c.cursor()
+    cur = c.cursor(buffered=True)
     
     q = "SELECT * FROM vehicles"
     cur.execute(q)
@@ -275,7 +274,7 @@ def restore():
         f.close()
         
         c = connect()
-        cur = c.cursor()
+        cur = c.cursor(buffered=True)
         
         # Clear existing data
         q1 = "DELETE FROM vehicles"
@@ -302,26 +301,22 @@ def restore():
         print("-"*60)
 
 
-
-
-
 # Main menu
 def menu():
     while True:
-        print("\n" + "="*60)
-        print(" "*12 + "AUTOMOBILE MANAGEMENT SYSTEM")
-        print("="*60)
-        print("\n[1] Add Vehicle")
-        print("[2] Display All Vehicles")
-        print("[3] Search Vehicle")
-        print("[4] Update Vehicle")
-        print("[5] Delete Vehicle")
-        print("[6] Backup to File (Pickle)")
-        print("[7] Restore from File (Pickle)")
-        print("[8] Exit")
-        print("\n" + "="*60)
         
-        ch = input("Enter your choice (1-8): ")
+        print("\n┌" + "─"*57 + "┐")
+        print("│  [1] ➤ Add Vehicle" + " "*38 + "│")
+        print("│  [2] ➤ Display All Vehicles" + " "*29 + "│")
+        print("│  [3] ➤ Search Vehicle" + " "*35 + "│")
+        print("│  [4] ➤ Update Vehicle" + " "*35 + "│")
+        print("│  [5] ➤ Delete Vehicle" + " "*35 + "│")
+        print("│  [6] ➤ Backup to File (Pickle)" + " "*26 + "│")
+        print("│  [7] ➤ Restore from File (Pickle)" + " "*23 + "│")
+        print("│  [8] ➤ Exit" + " "*45 + "│")
+        print("└" + "─"*57 + "┘")
+        
+        ch = input("\n➜ Enter your choice (1-8): ")
         
         if ch == "1":
             add()
@@ -338,46 +333,59 @@ def menu():
         elif ch == "7":
             restore()
         elif ch == "8":
-            print("\n" + "="*60)
-            print(" "*15 + "THANK YOU FOR USING!")
-            print(" "*10 + "AUTOMOBILE MANAGEMENT SYSTEM")
-            print("="*60 + "\n")
+            print("\n╔" + "═"*58 + "╗")
+            print("║" + " "*58 + "║")
+            print("║" + " "*15 + "THANK YOU FOR USING!" + " "*24 + "║")
+            print("║" + " "*10 + "AUTOMOBILE MANAGEMENT SYSTEM" + " "*20 + "║")
+            print("║" + " "*58 + "║")
+            print("╚" + "═"*58 + "╝\n")
             break
         else:
-            print("\n" + "-"*60)
-            print("⚠ Invalid choice! Please enter a number between 1-8.")
-            print("-"*60)
-
-
-
+            print("\n┌" + "─"*58 + "┐")
+            print("│  ⚠  Invalid choice! Please enter number between 1-8" + " "*4 + "│")
+            print("└" + "─"*58 + "┘")
 
 
 # Run the program
-print("\n" + "*"*60)
-print(" "*15 + "WELCOME TO")
-print(" "*10 + "AUTOMOBILE MANAGEMENT SYSTEM")
-print("*"*60)
+print("\n")
+print("╔═════════════════════════════════════════════════════════════════╗")
+print("║                                                                 ║")
+print("║  ██╗    ██╗███████╗██╗      ██████╗ ██████╗ ███╗   ███╗███████╗ ║")
+print("║  ██║    ██║██╔════╝██║     ██╔════╝██╔═══██╗████╗ ████║██╔════╝ ║")
+print("║  ██║ █╗ ██║█████╗  ██║     ██║     ██║   ██║██╔████╔██║█████╗   ║")
+print("║  ██║███╗██║██╔══╝  ██║     ██║     ██║   ██║██║╚██╔╝██║██╔══╝   ║")
+print("║  ╚███╔███╔╝███████╗███████╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗ ║")
+print("║   ╚══╝╚══╝ ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝ ║")
+print("║                                                                 ║")
+print("║              AUTOMOBILE MANAGEMENT SYSTEM                       ║")
+print("║                                                                 ║")
+print("╚═════════════════════════════════════════════════════════════════╝")
 
 # Project description
-print("\n" + "="*60)
-print(" "*18 + "PROJECT DESCRIPTION")
-print("="*60)
-print("\nThis project demonstrates:")
-print("\n1. PYTHON-MYSQL CONNECTIVITY")
-print("   - Connecting Python with MySQL database")
-print("   - Executing SQL queries from Python")
-print("\n2. CRUD OPERATIONS (Database Management)")
-print("   [C] CREATE  - Add new vehicle records")
-print("   [R] READ    - Display all vehicle records")
-print("   [U] UPDATE  - Modify existing vehicle details")
-print("   [D] DELETE  - Remove vehicle records")
-print("   [S] SEARCH  - Find vehicles by registration number")
-print("\n3. PICKLE MODULE (File Handling)")
-print("   - BACKUP  : Export database records to binary file")
-print("   - RESTORE : Import records from binary file")
-print("   - Uses pickle.dump() and pickle.load() functions")
-print("\n" + "="*60)
-print("\nPress Enter to continue...")
+print("\n" + "┌" + "─"*58 + "┐")
+print("│" + " "*16 + "PROJECT DESCRIPTION" + " "*23 + "│")
+print("└" + "─"*58 + "┘")
+
+
+
+print("\n▶ 1. PYTHON-MYSQL CONNECTIVITY")
+print("  ├─ Connecting Python with MySQL database")
+print("  └─ Executing SQL queries from Python")
+
+print("\n▶ 2. CRUD OPERATIONS (Database Management)")
+print("  ├─ [C] CREATE  → Add new vehicle records")
+print("  ├─ [R] READ    → Display all vehicle records")
+print("  ├─ [U] UPDATE  → Modify existing vehicle details")
+print("  ├─ [D] DELETE  → Remove vehicle records")
+print("  └─ [S] SEARCH  → Find vehicles by registration number")
+
+print("\n▶ 3. PICKLE MODULE (File Handling)")
+print("  ├─ BACKUP  : Export database records to binary file")
+print("  ├─ RESTORE : Import records from binary file")
+print("  └─ Uses pickle.dump() and pickle.load() functions")
+
+print("\n" + "═"*60)
+print("\n⏎  Press Enter to continue...")
 input()
 
 # Setup database and table
